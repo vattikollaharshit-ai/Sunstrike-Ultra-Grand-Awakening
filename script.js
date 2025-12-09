@@ -57,28 +57,30 @@ function updateSecondaryDisplay() {
 }
 
 function updateButtonsState() {
+  // Session buttons
   startSessionBtn.disabled = sessionActive;
   endSessionBtn.disabled = !sessionActive;
 
+  // Secondary timer controls
   startSecondaryBtn.disabled = !sessionActive || secondaryActive;
   pauseSecondaryBtn.disabled = !sessionActive || !secondaryActive;
 
-  submitQuestionBtn.disabled = !sessionActive || secondarySeconds === 0;
+  // Submit button: enabled only when session is active and at least 1 second recorded
+  submitQuestionBtn.disabled = !sessionActive || secondarySeconds <= 0;
 
+  // Logs related
   const hasLogs = logs.length > 0;
   clearLogsBtn.disabled = !hasLogs;
   exportLogsBtn.disabled = !hasLogs;
 
-  // merge button only if at least 2 selected
   const selectedCount = logs.filter(l => l.selected).length;
   mergeLogsBtn.disabled = selectedCount < 2;
 }
 
 function saveToLocalStorage() {
   const data = {
-    sessionActive,
+    sessionActive: false, // never resume a running timer automatically
     mainTimerSeconds,
-    secondarySeconds,
     logs,
     logIdCounter,
     activeSessionName: activeSessionNameEl.textContent || "",
@@ -91,7 +93,7 @@ function loadFromLocalStorage() {
   if (!raw) return;
   try {
     const data = JSON.parse(raw);
-    sessionActive = false; // always start as not active to avoid weird resume
+    sessionActive = false; // always start as idle
     mainTimerSeconds = data.mainTimerSeconds || 0;
     secondarySeconds = 0;
     logs = data.logs || [];
@@ -143,10 +145,14 @@ function stopMainTimer() {
 function startSecondaryTimer() {
   if (secondaryInterval) clearInterval(secondaryInterval);
   secondaryActive = true;
+
   secondaryInterval = setInterval(() => {
     secondarySeconds++;
     updateSecondaryDisplay();
+    // We don't save every second for performance; logs & main timer handle persistence.
+    updateButtonsState();
   }, 1000);
+
   updateButtonsState();
 }
 
@@ -159,7 +165,7 @@ function pauseSecondaryTimer() {
   updateButtonsState();
 }
 
-function stopSecondaryTimer() {
+function resetSecondaryTimer() {
   pauseSecondaryTimer();
   secondarySeconds = 0;
   updateSecondaryDisplay();
@@ -170,6 +176,7 @@ function stopSecondaryTimer() {
 startSessionBtn.addEventListener("click", () => {
   const name = sessionNameInput.value.trim() || "Unnamed Session";
   let minutes = parseInt(mainMinutesInput.value, 10);
+
   if (Number.isNaN(minutes) || minutes <= 0) {
     alert("Please enter a valid main timer in minutes.");
     return;
@@ -181,8 +188,10 @@ startSessionBtn.addEventListener("click", () => {
   sessionStatusEl.textContent = "Running";
   sessionActive = true;
 
+  // Start fresh main timer for this session
   startMainTimer(totalSeconds);
-  stopSecondaryTimer(); // reset secondary
+  resetSecondaryTimer(); // reset question timer
+
   saveToLocalStorage();
   updateButtonsState();
 });
@@ -192,10 +201,13 @@ endSessionBtn.addEventListener("click", () => {
     sessionStatusEl.textContent = "Idle";
     return;
   }
+
   sessionActive = false;
   sessionStatusEl.textContent = "Ended";
+
   stopMainTimer();
-  stopSecondaryTimer();
+  resetSecondaryTimer();
+
   updateButtonsState();
   saveToLocalStorage();
 });
@@ -203,33 +215,36 @@ endSessionBtn.addEventListener("click", () => {
 // ================== QUESTION SUBMIT ==================
 submitQuestionBtn.addEventListener("click", () => {
   if (!sessionActive) return;
-  if (secondarySeconds === 0) {
-    alert("Start the question timer first.");
+
+  if (secondarySeconds <= 0) {
+    alert("You must run the question timer for at least 1 second before submitting.");
     return;
   }
 
-  // Subtract secondarySeconds from mainTimerSeconds, but not below zero
+  // Subtract the time spent on the question from the main timer (without going below 0)
   const timeSpent = secondarySeconds;
   mainTimerSeconds = Math.max(0, mainTimerSeconds - timeSpent);
   updateMainTimerDisplay();
 
-  const statusVal = questionStatusSelect.value;
+  // Determine status label
+  const statusVal = questionStatusSelect.value; // "correct" | "incorrect" | "unattempted"
   let statusLabel = "Unattempted";
   if (statusVal === "correct") statusLabel = "Correct";
   else if (statusVal === "incorrect") statusLabel = "Incorrect";
 
-  // Create log
+  // Create log entry
   const logItem = {
     id: logIdCounter++,
-    timeSpent: timeSpent,
+    timeSpent,
     mainRemaining: mainTimerSeconds,
     status: statusVal,
     selected: false,
   };
+
   logs.push(logItem);
 
-  // Reset secondary timer
-  stopSecondaryTimer();
+  // Reset secondary timer for next question
+  resetSecondaryTimer();
 
   renderLogs();
   updateButtonsState();
@@ -239,6 +254,7 @@ submitQuestionBtn.addEventListener("click", () => {
 // ================== LOG RENDERING ==================
 function renderLogs() {
   logsBody.innerHTML = "";
+
   logs.forEach((log, index) => {
     const tr = document.createElement("tr");
 
@@ -255,7 +271,7 @@ function renderLogs() {
     selectTd.appendChild(cb);
     tr.appendChild(selectTd);
 
-    // Index / ID
+    // Index (displayed number)
     const idTd = document.createElement("td");
     idTd.textContent = index + 1;
     tr.appendChild(idTd);
@@ -294,12 +310,14 @@ function renderLogs() {
     delBtn.className = "btn danger";
     delBtn.style.padding = "0.25rem 0.7rem";
     delBtn.style.fontSize = "0.75rem";
+
     delBtn.addEventListener("click", () => {
       logs = logs.filter(l => l.id !== log.id);
       renderLogs();
       updateButtonsState();
       saveToLocalStorage();
     });
+
     actionsTd.appendChild(delBtn);
     tr.appendChild(actionsTd);
 
@@ -312,30 +330,33 @@ function renderLogs() {
 // ================== LOG MERGE ==================
 mergeLogsBtn.addEventListener("click", () => {
   const selectedLogs = logs.filter(l => l.selected);
+
   if (selectedLogs.length < 2) {
     alert("Select at least two logs to merge.");
     return;
   }
 
-  // Sum time spent
+  // Total time spent is the sum of selected logs
   const mergedTime = selectedLogs.reduce((sum, l) => sum + l.timeSpent, 0);
-  // Take remaining from the *latest* selected log (by mainRemaining or by position)
-  const latest = selectedLogs[selectedLogs.length - 1];
-  const mergedRemaining = latest.mainRemaining;
+
+  // We use the mainRemaining from the latest log in the original order
+  const selectedIds = new Set(selectedLogs.map(l => l.id));
+  const originalOrderSelected = logs.filter(l => selectedIds.has(l.id));
+  const latest = originalOrderSelected[originalOrderSelected.length - 1];
+  const mergedRemaining = latest ? latest.mainRemaining : 0;
 
   // Status merge rule:
-  // if any incorrect -> incorrect
-  // else if any correct -> correct
-  // else unattempted
+  // - If any incorrect -> incorrect
+  // - Else if any correct -> correct
+  // - Else unattempted
   let mergedStatus = "unattempted";
   if (selectedLogs.some(l => l.status === "incorrect")) mergedStatus = "incorrect";
   else if (selectedLogs.some(l => l.status === "correct")) mergedStatus = "correct";
 
   // Remove selected logs
-  const selectedIds = new Set(selectedLogs.map(l => l.id));
   logs = logs.filter(l => !selectedIds.has(l.id));
 
-  // Add new merged log
+  // Add merged log
   const mergedLog = {
     id: logIdCounter++,
     timeSpent: mergedTime,
@@ -353,10 +374,13 @@ mergeLogsBtn.addEventListener("click", () => {
 // ================== CLEAR LOGS ==================
 clearLogsBtn.addEventListener("click", () => {
   if (!logs.length) return;
+
   const sure = confirm("Clear all logs? This cannot be undone.");
   if (!sure) return;
+
   logs = [];
   logIdCounter = 1;
+
   renderLogs();
   updateButtonsState();
   saveToLocalStorage();
@@ -369,7 +393,6 @@ exportLogsBtn.addEventListener("click", () => {
     return;
   }
 
-  // Prepare data for SheetJS
   const data = logs.map((log, index) => {
     let statusLabel = "Unattempted";
     if (log.status === "correct") statusLabel = "Correct";
@@ -394,6 +417,8 @@ exportLogsBtn.addEventListener("click", () => {
 // ================== MANA PARTICLES ==================
 (function initParticles() {
   const particleContainer = document.getElementById("particles");
+  if (!particleContainer) return;
+
   const count = 40;
 
   for (let i = 0; i < count; i++) {
@@ -405,7 +430,7 @@ exportLogsBtn.addEventListener("click", () => {
     p.style.position = "absolute";
     p.style.width = `${size}px`;
     p.style.height = `${size}px`;
-    p.style.borderRadius = "50%";
+    p.style.borderRadius = "50%`;
     p.style.background = "rgba(0, 220, 255, 0.8)";
     p.style.boxShadow = "0 0 12px rgba(0, 240, 255, 0.9)";
     p.style.left = `${Math.random() * 100}%`;
@@ -419,7 +444,7 @@ exportLogsBtn.addEventListener("click", () => {
   }
 })();
 
-// Add keyframes via JS (for full file portability)
+// Add keyframes via JS (for portability)
 const styleEl = document.createElement("style");
 styleEl.textContent = `
 @keyframes floatUp {
