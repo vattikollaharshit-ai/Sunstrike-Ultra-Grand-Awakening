@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solo Leveling Study Dungeon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background-overlay"></div>
+  <div class="particle-layer" id="particles"></div>
+
+  <header class="site-header">
+    <h1 class="title">Solo Leveling Study Dungeon</h1>
+    <p class="subtitle">Forge your mind. Clear your session. Level up.</p>
+  </header>
+
+  <main class="container">
+
+    <!-- SECTION 1: SESSION SETUP -->
+    <section class="card" id="session-section">
+      <h2>Session Gate</h2>
+      <p class="section-desc">
+        Name your dungeon run and set your main time limit.
+      </p>
+
+      <div class="form-row">
+        <label for="sessionName">Session name</label>
+        <input type="text" id="sessionName" placeholder="e.g., Maths - Algebra Dungeon" />
+      </div>
+
+      <div class="form-row">
+        <label for="mainMinutes">Main timer (minutes)</label>
+        <input type="number" id="mainMinutes" min="1" max="600" value="60" />
+      </div>
+
+      <div class="session-info">
+        <p><span class="label">Active session:</span> <span id="activeSessionName">None</span></p>
+        <p><span class="label">Session status:</span> <span id="sessionStatus">Idle</span></p>
+      </div>
+
+      <div class="button-row">
+        <button id="startSessionBtn" class="btn primary">Start session</button>
+        <button id="endSessionBtn" class="btn danger" disabled>End session</button>
+      </div>
+    </section>
+
+    <!-- SECTION 2: TIMERS -->
+    <section class="card" id="timers-section">
+      <h2>Timer Core</h2>
+      <p class="section-desc">
+        Your main dungeon timer and per-question shadow timer.
+      </p>
+
+      <div class="timers-grid">
+        <div class="timer-block main-timer">
+          <h3>Main timer</h3>
+          <div id="mainTimerDisplay" class="timer-display">00:00:00</div>
+          <p class="timer-note">Counts down for the whole session.</p>
+        </div>
+
+        <div class="timer-block secondary-timer">
+          <h3>Question timer</h3>
+          <div id="secondaryTimerDisplay" class="timer-display">00:00</div>
+          <p class="timer-note">Tracks time per question. Only subtracts from main timer on submit.</p>
+
+          <div class="button-row">
+            <button id="startSecondaryBtn" class="btn secondary">Start question timer</button>
+            <button id="pauseSecondaryBtn" class="btn secondary" disabled>Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <div class="form-row inline">
+          <label for="questionStatus">Question result</label>
+          <select id="questionStatus">
+            <option value="correct">Correct</option>
+            <option value="incorrect">Incorrect</option>
+            <option value="unattempted">Unattempted</option>
+          </select>
+        </div>
+        <button id="submitQuestionBtn" class="btn highlight">Submit question</button>
+      </div>
+    </section>
+
+    <!-- SECTION 3: LOGS -->
+    <section class="card" id="logs-section">
+      <h2>Battle Logs</h2>
+      <p class="section-desc">
+        Every question attempt is recorded here. Merge, purge, or export your runs.
+      </p>
+
+      <div class="logs-controls">
+        <button id="mergeLogsBtn" class="btn secondary" disabled>Merge selected logs</button>
+        <button id="clearLogsBtn" class="btn danger" disabled>Clear all logs</button>
+        <button id="exportLogsBtn" class="btn primary" disabled>Export logs to Excel</button>
+      </div>
+
+      <div class="logs-table-wrapper">
+        <table id="logsTable">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>#</th>
+              <th>Question time</th>
+              <th>Main time remaining</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody">
+            <!-- Logs go here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 4: FOOTER -->
+    <footer class="site-footer">
+      <p>Forged in focus. Cleared like a dungeon.</p>
+    </footer>
+  </main>
+
+  <!-- SheetJS for Excel export (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
