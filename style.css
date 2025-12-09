@@ -1,4 +1,3 @@
-/* Base reset */
 * {
   margin: 0;
   padding: 0;
@@ -13,7 +12,6 @@ html, body {
   scroll-behavior: smooth;
 }
 
-/* Background aura and particles */
 .background-overlay {
   position: fixed;
   inset: 0;
@@ -30,7 +28,6 @@ html, body {
   z-index: -1;
 }
 
-/* Header */
 .site-header {
   text-align: center;
   padding: 2rem 1rem 1rem;
@@ -50,14 +47,12 @@ html, body {
   font-size: 0.95rem;
 }
 
-/* Layout container */
 .container {
   max-width: 960px;
   margin: 0 auto 3rem;
   padding: 0 1rem;
 }
 
-/* Cards */
 .card {
   background: rgba(5, 10, 25, 0.9);
   border-radius: 14px;
@@ -106,7 +101,6 @@ html, body {
   margin-bottom: 1rem;
 }
 
-/* Form rows */
 .form-row {
   margin-bottom: 0.9rem;
   display: flex;
@@ -146,7 +140,6 @@ select:focus {
   background: rgba(3, 10, 30, 0.98);
 }
 
-/* Session info */
 .session-info {
   margin: 0.6rem 0 1rem;
   font-size: 0.9rem;
@@ -158,7 +151,6 @@ select:focus {
   font-weight: 600;
 }
 
-/* Buttons */
 .button-row,
 .submit-row,
 .logs-controls {
@@ -212,7 +204,6 @@ select:focus {
   box-shadow: 0 0 18px rgba(0, 234, 255, 0.9);
 }
 
-/* Timers */
 .timers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -248,13 +239,11 @@ select:focus {
   color: #93b4e0;
 }
 
-/* Submit row */
 .submit-row {
   margin-top: 1.2rem;
   align-items: center;
 }
 
-/* Logs */
 .logs-table-wrapper {
   margin-top: 1rem;
   max-height: 340px;
@@ -324,7 +313,6 @@ tbody tr:hover {
   border: 1px solid rgba(255, 200, 0, 0.7);
 }
 
-/* Footer */
 .site-footer {
   text-align: center;
   margin-top: 2.5rem;
@@ -333,7 +321,6 @@ tbody tr:hover {
   opacity: 0.8;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   .title {
     font-size: 2rem;

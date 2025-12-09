@@ -12,25 +12,25 @@
 
   <header class="site-header">
     <h1 class="title">Solo Leveling Study Dungeon</h1>
-    <p class="subtitle">Forge your mind. Clear your session. Level up.</p>
+    <p class="subtitle">Static main timer. Shadow questions. Pure focus.</p>
   </header>
 
   <main class="container">
 
-    <!-- SECTION 1: SESSION SETUP -->
+    <!-- SESSION SETUP -->
     <section class="card" id="session-section">
       <h2>Session Gate</h2>
       <p class="section-desc">
-        Name your dungeon run and set your main time limit.
+        Name your study run and set your total static time. It only decreases when you submit questions.
       </p>
 
       <div class="form-row">
         <label for="sessionName">Session name</label>
-        <input type="text" id="sessionName" placeholder="e.g., Maths - Algebra Dungeon" />
+        <input type="text" id="sessionName" placeholder="e.g., JEE Physics - Mechanics" />
       </div>
 
       <div class="form-row">
-        <label for="mainMinutes">Main timer (minutes)</label>
+        <label for="mainMinutes">Main timer (minutes, static)</label>
         <input type="number" id="mainMinutes" min="1" max="600" value="60" />
       </div>
 
@@ -45,27 +45,27 @@
       </div>
     </section>
 
-    <!-- SECTION 2: TIMERS -->
+    <!-- TIMERS -->
     <section class="card" id="timers-section">
       <h2>Timer Core</h2>
       <p class="section-desc">
-        Your main dungeon timer and per-question shadow timer.
+        The main timer is your total available time. The question timer tracks each question separately. Only submissions affect the main timer.
       </p>
 
       <div class="timers-grid">
         <div class="timer-block main-timer">
-          <h3>Main timer</h3>
+          <h3>Main timer (static)</h3>
           <div id="mainTimerDisplay" class="timer-display">00:00:00</div>
-          <p class="timer-note">Counts down for the whole session.</p>
+          <p class="timer-note">This will only change when you submit.</p>
         </div>
 
         <div class="timer-block secondary-timer">
           <h3>Question timer</h3>
           <div id="secondaryTimerDisplay" class="timer-display">00:00</div>
-          <p class="timer-note">Tracks time per question. Only subtracts from main timer on submit.</p>
+          <p class="timer-note">Tracks each question. You control start/pause.</p>
 
           <div class="button-row">
-            <button id="startSecondaryBtn" class="btn secondary">Start question timer</button>
+            <button id="startSecondaryBtn" class="btn secondary" disabled>Start question timer</button>
             <button id="pauseSecondaryBtn" class="btn secondary" disabled>Pause</button>
           </div>
         </div>
@@ -80,15 +80,15 @@
             <option value="unattempted">Unattempted</option>
           </select>
         </div>
-        <button id="submitQuestionBtn" class="btn highlight">Submit question</button>
+        <button id="submitQuestionBtn" class="btn highlight" disabled>Submit question</button>
       </div>
     </section>
 
-    <!-- SECTION 3: LOGS -->
+    <!-- LOGS -->
     <section class="card" id="logs-section">
       <h2>Battle Logs</h2>
       <p class="section-desc">
-        Every question attempt is recorded here. Merge, purge, or export your runs.
+        Each submission becomes a log. Merge runs, clear them, or export to Excel.
       </p>
 
       <div class="logs-controls">
@@ -110,19 +110,18 @@
             </tr>
           </thead>
           <tbody id="logsBody">
-            <!-- Logs go here -->
+            <!-- logs go here -->
           </tbody>
         </table>
       </div>
     </section>
 
-    <!-- SECTION 4: FOOTER -->
     <footer class="site-footer">
-      <p>Forged in focus. Cleared like a dungeon.</p>
+      <p>Every question is a gate. Clear them one by one.</p>
     </footer>
   </main>
 
-  <!-- SheetJS for Excel export (CDN) -->
+  <!-- SheetJS for Excel export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
