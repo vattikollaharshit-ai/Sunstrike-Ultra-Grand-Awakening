@@ -56,16 +56,18 @@
         <div class="timer-block main-timer">
           <h3>Main timer (static)</h3>
           <div id="mainTimerDisplay" class="timer-display">00:00:00</div>
-          <p class="timer-note">This will only change when you submit.</p>
+          <p class="timer-note">Shows your remaining total time. Only changes when you submit.</p>
         </div>
 
         <div class="timer-block secondary-timer">
           <h3>Question timer</h3>
           <div id="secondaryTimerDisplay" class="timer-display">00:00</div>
-          <p class="timer-note">Tracks each question. You control start/pause.</p>
+          <p class="timer-note">
+            Start / pause / resume as you wish. Resets only after you submit.
+          </p>
 
           <div class="button-row">
-            <button id="startSecondaryBtn" class="btn secondary" disabled>Start question timer</button>
+            <button id="startSecondaryBtn" class="btn secondary" disabled>Start / Resume</button>
             <button id="pauseSecondaryBtn" class="btn secondary" disabled>Pause</button>
           </div>
         </div>
@@ -88,7 +90,7 @@
     <section class="card" id="logs-section">
       <h2>Battle Logs</h2>
       <p class="section-desc">
-        Each submission becomes a log. Merge runs, clear them, or export to Excel.
+        Each submission becomes a log. Status (correct/incorrect/unattempted) appears directly in the log. Merge, clear, or export to Excel.
       </p>
 
       <div class="logs-controls">

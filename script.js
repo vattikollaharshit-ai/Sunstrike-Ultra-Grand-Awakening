@@ -161,6 +161,16 @@ endSessionBtn.addEventListener("click", () => {
   saveState();
 });
 
+startSecondaryBtn.addEventListener("click", () => {
+  if (!sessionActive) return;
+  startSecondary();
+});
+
+pauseSecondaryBtn.addEventListener("click", () => {
+  if (!sessionActive) return;
+  pauseSecondary();
+});
+
 // ======== SUBMIT QUESTION ========
 submitQuestionBtn.addEventListener("click", () => {
   if (!sessionActive) return;
@@ -171,12 +181,11 @@ submitQuestionBtn.addEventListener("click", () => {
 
   const timeSpent = secondarySeconds;
 
-  // This is the core logic you wanted:
-  // main timer is static, only subtracts when we submit
+  // Main timer is static, only changes here
   mainTimerSeconds = Math.max(0, mainTimerSeconds - timeSpent);
   updateMainTimerDisplay();
 
-  const statusVal = questionStatusSelect.value; // correct / incorrect / unattempted
+  const statusVal = questionStatusSelect.value; // "correct" | "incorrect" | "unattempted"
 
   const log = {
     id: logIdCounter++,
@@ -263,6 +272,8 @@ function renderLogs() {
 
     logsBody.appendChild(tr);
   });
+
+  updateButtonsState();
 }
 
 // ======== MERGE LOGS ========
@@ -275,7 +286,6 @@ mergeLogsBtn.addEventListener("click", () => {
 
   const mergedTime = selectedLogs.reduce((sum, l) => sum + l.timeSpent, 0);
 
-  // keep mainRemaining from latest in original order
   const selectedIds = new Set(selectedLogs.map(l => l.id));
   const inOrder = logs.filter(l => selectedIds.has(l.id));
   const latest = inOrder[inOrder.length - 1];
